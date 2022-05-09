@@ -13,10 +13,8 @@ class NotesApplicationWallet: ApplicationWallet {
         boxesToUpdate: MutableList<Box<Proposition>>?,
         boxIdsToRemove: MutableList<ByteArray>?
     ) {
-        TODO("Not yet implemented")
     }
 
     override fun onRollback(blockId: ByteArray?) {
-        TODO("Not yet implemented")
     }
 }

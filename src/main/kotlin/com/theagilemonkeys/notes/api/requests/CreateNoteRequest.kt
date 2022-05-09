@@ -1,8 +1,10 @@
 package com.theagilemonkeys.notes.api.requests
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 data class CreateNoteRequest(
-    val title: String,
-    val content: String,
-    override val proposition: String,
-    override val fee: Long
+    @JsonProperty("title") val title: String,
+    @JsonProperty("content") val content: String,
+    @JsonProperty("proposition") override val proposition: String,
+    @JsonProperty("fee") override val fee: Long
 ) : BaseRequest

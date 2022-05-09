@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.6.20"
+    application
 }
 
 group = "org.theagilemonkeys"
@@ -13,8 +14,13 @@ repositories {
 }
 
 dependencies {
+    implementation(kotlin("stdlib"))
     implementation("io.horizen:sidechains-sdk:0.3.0")
-    testImplementation(kotlin("test"))
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2")
+}
+
+application {
+    mainClass.set("com.theagilemonkeys.notes.NotesAppKt")
 }
 
 tasks.test {
@@ -22,5 +28,14 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.11"
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks.withType<Jar> {
+    exclude("META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.DSA")
+}
+
+task("copyDependencies", Copy::class) {
+    from(configurations.default).into("$buildDir/libs")
+    dependsOn("build")
 }

@@ -16,7 +16,7 @@ class NotesApplicationState: ApplicationState {
         stateReader: SidechainStateReader?,
         transaction: BoxTransaction<Proposition, Box<Proposition>>?
     ) {
-        TODO("Not yet implemented")
+
     }
 
     // TODO: here we expect to update notes database. The data from it will be used during validation.

@@ -1,3 +1,9 @@
 package com.theagilemonkeys.notes.api.requests
 
-data class DeleteNoteRequest(val id: String, override val proposition: String, override val fee: Long) : BaseRequest
+import com.fasterxml.jackson.annotation.JsonProperty
+
+data class DeleteNoteRequest(
+    @JsonProperty("id") val id: String,
+    @JsonProperty("proposition") override val proposition: String,
+    @JsonProperty("fee") override val fee: Long
+) : BaseRequest

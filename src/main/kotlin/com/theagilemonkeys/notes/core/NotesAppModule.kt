@@ -22,6 +22,11 @@ import com.horizen.wallet.ApplicationWallet
 import com.theagilemonkeys.notes.api.NotesAPI
 import com.theagilemonkeys.notes.boxes.NotesAppBoxes
 import com.theagilemonkeys.notes.boxes.serializers.NoteBoxSerializer
+import com.theagilemonkeys.notes.transactions.NoteCreatedTransaction
+import com.theagilemonkeys.notes.transactions.NotesAppTransactions
+import com.theagilemonkeys.notes.transactions.serializers.NoteCreatedTransactionSerializer
+import com.theagilemonkeys.notes.transactions.serializers.NoteDeletedTransactionSerializer
+import com.theagilemonkeys.notes.transactions.serializers.NoteUpdatedTransactionSerializer
 import java.io.File
 import java.util.*
 
@@ -50,12 +55,12 @@ class NotesAppModule(userSettingsFileName: String?) : AbstractModule() {
         // Specify how to serialize custom Transaction.
         val customTransactionSerializers: HashMap<Byte, TransactionSerializer<BoxTransaction<Proposition, Box<Proposition>>>> =
             HashMap<Byte, TransactionSerializer<BoxTransaction<Proposition, Box<Proposition>>>>()
-        /**customTransactionSerializers[CarRegistryTransactionsIdsEnum.CarDeclarationTransactionId.id()] =
-            CarDeclarationTransactionSerializer.getSerializer() as TransactionSerializer<*>
-        customTransactionSerializers[CarRegistryTransactionsIdsEnum.SellCarTransactionId.id()] =
-            SellCarTransactionSerializer.getSerializer() as TransactionSerializer<*>
-        customTransactionSerializers[CarRegistryTransactionsIdsEnum.BuyCarTransactionId.id()] =
-            BuyCarTransactionSerializer.getSerializer() as TransactionSerializer<*>*/
+        customTransactionSerializers[NotesAppTransactions.NoteCreated.id] =
+            NoteCreatedTransactionSerializer() as TransactionSerializer<BoxTransaction<Proposition, Box<Proposition>>>
+        customTransactionSerializers[NotesAppTransactions.NoteUpdated.id] =
+            NoteUpdatedTransactionSerializer() as TransactionSerializer<BoxTransaction<Proposition, Box<Proposition>>>
+        customTransactionSerializers[NotesAppTransactions.NoteDeleted.id] =
+            NoteDeletedTransactionSerializer() as TransactionSerializer<BoxTransaction<Proposition, Box<Proposition>>>
 
         // Create companions that will allow to serialize and deserialize any kind of core and custom types specified.
         val transactionsCompanion = SidechainTransactionsCompanion(customTransactionSerializers)
@@ -86,7 +91,7 @@ class NotesAppModule(userSettingsFileName: String?) : AbstractModule() {
         customApiGroups.add(NotesAPI(transactionsCompanion))
 
         // No core API endpoints to be disabled:
-        val rejectedApiPaths: List<Pair<String, String>> = ArrayList()
+        val rejectedApiPaths: MutableList<Pair<String, String>> = ArrayList()
 
         // Inject custom objects:
         // Names are equal to the ones specified in SidechainApp class constructor.
@@ -154,11 +159,11 @@ class NotesAppModule(userSettingsFileName: String?) : AbstractModule() {
             .annotatedWith(Names.named("ConsensusStorage"))
             .toInstance(VersionedLevelDbStorageAdapter(consensusStore))
 
-        bind(object : TypeLiteral<List<ApplicationApiGroup>>() {})
+        bind(object : TypeLiteral<MutableList<ApplicationApiGroup>>() {})
             .annotatedWith(Names.named("CustomApiGroups"))
             .toInstance(customApiGroups)
 
-        bind(object : TypeLiteral<List<Pair<String, String>>>() {})
+        bind(object : TypeLiteral<MutableList<Pair<String, String>>>() {})
             .annotatedWith(Names.named("RejectedApiPaths"))
             .toInstance(rejectedApiPaths)
     }

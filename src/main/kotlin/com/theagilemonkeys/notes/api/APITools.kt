@@ -10,19 +10,16 @@ import com.horizen.proposition.Proposition
 import com.horizen.proposition.PublicKey25519Proposition
 import com.horizen.transaction.AbstractRegularTransaction
 import com.horizen.transaction.BoxTransaction
-import com.horizen.utils.ByteArrayWrapper
 import java.util.*
-import java.util.stream.Collectors
 import kotlin.math.abs
 
 private fun boxesFromMemoryPool(memoryPool: NodeMemoryPool): List<ByteArray> = memoryPool.transactions
     .map { transaction: BoxTransaction<Proposition?, Box<Proposition?>?> ->
-        transaction.boxIdsToOpen().stream().map { obj: ByteArrayWrapper -> obj.data() }
-            .collect(Collectors.toList())
+        transaction.boxIdsToOpen().map { it.data() }
     }.flatten()
 
 @Throws(IllegalStateException::class)
-fun getTransactionBoxes(view: SidechainNodeView, payment: Long): TransactionBoxes {
+fun getTransactionFundingBoxes(view: SidechainNodeView, payment: Long): TransactionBoxes {
     val paymentBoxes = mutableListOf<Box<Proposition>>()
     val boxIdsToExclude = boxesFromMemoryPool(view.nodeMemoryPool)
     var amountToPay = payment
@@ -48,13 +45,13 @@ fun getTransactionBoxes(view: SidechainNodeView, payment: Long): TransactionBoxe
 }
 
 fun <T : AbstractRegularTransaction> SidechainNodeView.createSignedTransaction(
-    inputs: List<Box<Proposition>>,
+    fundingBoxes: List<Box<Proposition>>,
     transactionCreation: (List<Signature25519>) -> T
 ): T {
-    val messageToSign = transactionCreation(Collections.nCopies<Signature25519>(inputs.size, null)).messageToSign()
+    val messageToSign = transactionCreation(Collections.nCopies<Signature25519>(fundingBoxes.size, null)).messageToSign()
 
     return transactionCreation(
-        inputs
+        fundingBoxes
             .map { box ->
                 nodeWallet.secretByPublicKey(box.proposition()).get()
                     .sign(messageToSign) as Signature25519
@@ -62,4 +59,4 @@ fun <T : AbstractRegularTransaction> SidechainNodeView.createSignedTransaction(
     )
 }
 
-class TransactionBoxes(val inputs: List<Box<Proposition>>, val outputs: List<ZenBoxData>)
+class TransactionBoxes(val fundingInputs: List<Box<Proposition>>, val changeOutput: List<ZenBoxData>)

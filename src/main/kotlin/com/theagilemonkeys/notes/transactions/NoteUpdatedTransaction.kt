@@ -10,26 +10,26 @@ import com.theagilemonkeys.notes.boxes.data.NoteBoxData
 import com.theagilemonkeys.notes.boxes.data.serializers.NoteBoxDataSerializer
 import com.theagilemonkeys.notes.extensions.bytesMutableList
 import com.theagilemonkeys.notes.extensions.serialize
-import com.theagilemonkeys.notes.transactions.serializers.NoteCreatedTransactionSerializer
+import com.theagilemonkeys.notes.transactions.serializers.NoteUpdatedTransactionSerializer
 import scorex.core.`NodeViewModifier$`
 import scorex.core.serialization.BytesSerializable
 import scorex.core.serialization.ScorexSerializer
 import scorex.util.serialization.Reader
 import scorex.util.serialization.Writer
 
-class NoteCreatedTransaction(
+class NoteUpdatedTransaction(
     fundingInputsIDs: MutableList<ByteArray>,
     fundingInputsProofs: List<Signature25519>,
     changeOutputs: List<ZenBoxData>,
     fee: Long,
     val data: NoteBoxData,
-    val version: Byte): AbstractRegularTransaction(fundingInputsIDs, fundingInputsProofs, changeOutputs, fee) {
+    private val version: Byte): AbstractRegularTransaction(fundingInputsIDs, fundingInputsProofs, changeOutputs, fee) {
 
     companion object {
         const val currentVersion = 1
 
-        fun parse(reader: Reader): NoteCreatedTransaction {
-            return NoteCreatedTransaction(
+        fun parse(reader: Reader): NoteUpdatedTransaction {
+            return NoteUpdatedTransaction(
                 reader.bytesMutableList(`NodeViewModifier$`.`MODULE$`.ModifierIdSize()),
                 zenBoxProofsSerializer.parse(reader),
                 zenBoxDataListSerializer.parse(reader),
@@ -40,7 +40,7 @@ class NoteCreatedTransaction(
         }
     }
 
-    override fun serializer(): ScorexSerializer<BytesSerializable> = NoteCreatedTransactionSerializer() as ScorexSerializer<BytesSerializable>
+    override fun serializer(): ScorexSerializer<BytesSerializable> = NoteUpdatedTransactionSerializer() as ScorexSerializer<BytesSerializable>
 
     override fun transactionTypeId(): Byte = NotesAppTransactions.NoteCreated.id
 
