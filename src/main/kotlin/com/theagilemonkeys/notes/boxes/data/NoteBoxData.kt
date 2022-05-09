@@ -15,8 +15,7 @@ data class NoteBoxData(
     @JsonProperty("title") val title: String,
     @JsonProperty("content") val content: String,
     @JsonProperty("createdAt") val createdAt: Long
-) :
-// Does it make sense to have to set nonce = 1 by default?
+) : // Does it make sense to have to set nonce = 1 by default?
     AbstractBoxData<PublicKey25519Proposition, NoteBox, NoteBoxData>(proposition, 1) {
 
     override fun serializer() = NoteBoxDataSerializer()

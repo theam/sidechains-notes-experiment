@@ -32,7 +32,7 @@ private object NotesAPIErrors {
     }
 }
 
-class NotesAPI(private val sidechainTransactionsCompanion: SidechainTransactionsCompanion): ApplicationApiGroup() {
+class NotesAPI(private val sidechainTransactionsCompanion: SidechainTransactionsCompanion) : ApplicationApiGroup() {
     override fun basePath(): String = "notes"
 
     override fun getRoutes(): MutableList<Route> = mutableListOf(
@@ -45,11 +45,17 @@ class NotesAPI(private val sidechainTransactionsCompanion: SidechainTransactions
         val noteProposition = PublicKey25519PropositionSerializer.getSerializer()
             .parseBytes(BytesUtils.fromHexString(request.proposition))
 
-        val data = NoteBoxData(noteProposition, UUID.randomUUID().toString(), request.title, request.content, view.nodeHistory.currentHeight.toLong())
+        val data = NoteBoxData(
+            noteProposition,
+            UUID.randomUUID().toString(),
+            request.title,
+            request.content,
+            view.nodeHistory.currentHeight.toLong()
+        )
         val boxes = getTransactionFundingBoxes(view, request.fee)
 
         val signedTransaction = view.createSignedTransaction(boxes.fundingInputs) { proofs ->
-             NoteCreatedTransaction(
+            NoteCreatedTransaction(
                 boxes.fundingInputs.map { it.id() }.toMutableList(),
                 proofs,
                 boxes.changeOutput,
@@ -59,53 +65,63 @@ class NotesAPI(private val sidechainTransactionsCompanion: SidechainTransactions
             )
         }
 
-        return CreateNoteResponse(data.id, ByteUtils.toHexString(sidechainTransactionsCompanion.toBytes(signedTransaction)))
+        return CreateNoteResponse(
+            data.id,
+            ByteUtils.toHexString(sidechainTransactionsCompanion.toBytes(signedTransaction))
+        )
     }
 
-    private fun updateNote(view: SidechainNodeView, request: UpdateNoteRequest): ApiResponse = view.getNoteBox(request.id)?.let { noteBox ->
-        if (!view.isBoxSecretPresent(noteBox)) {
-            return NotesAPIErrors.ownerPropositionError
-        }
+    private fun updateNote(view: SidechainNodeView, request: UpdateNoteRequest): ApiResponse =
+        view.getNoteBox(request.id)?.let { noteBox ->
+            if (!view.isBoxSecretPresent(noteBox)) {
+                return NotesAPIErrors.ownerPropositionError
+            }
 
-        val boxes = getTransactionFundingBoxes(view, request.fee)
-        val data = noteBox.data.copy(content = request.content)
+            val boxes = getTransactionFundingBoxes(view, request.fee)
+            val data = noteBox.data.copy(content = request.content)
 
-        val signedTransaction = view.createSignedTransaction(boxes.fundingInputs + (noteBox as Box<Proposition>)) { proofs ->
-            NoteUpdatedTransaction(
-                (boxes.fundingInputs.map { it.id() } + noteBox.id()).toMutableList(),
-                proofs,
-                boxes.changeOutput,
-                request.fee,
-                data,
-                NoteUpdatedTransaction.currentVersion.toByte()
+            val signedTransaction =
+                view.createSignedTransaction(boxes.fundingInputs + (noteBox as Box<Proposition>)) { proofs ->
+                    NoteUpdatedTransaction(
+                        (boxes.fundingInputs.map { it.id() } + noteBox.id()).toMutableList(),
+                        proofs,
+                        boxes.changeOutput,
+                        request.fee,
+                        data,
+                        NoteUpdatedTransaction.currentVersion.toByte()
+                    )
+                }
+
+            return UpdateNoteResponse(
+                data.id,
+                ByteUtils.toHexString(sidechainTransactionsCompanion.toBytes(signedTransaction))
             )
+        } ?: run {
+            return NotesAPIErrors.noteBoxNotFound(request.id)
         }
 
-        return UpdateNoteResponse(data.id, ByteUtils.toHexString(sidechainTransactionsCompanion.toBytes(signedTransaction)))
-    } ?: run {
-        return NotesAPIErrors.noteBoxNotFound(request.id)
-    }
+    private fun deleteNote(view: SidechainNodeView, request: DeleteNoteRequest): ApiResponse =
+        view.getNoteBox(request.id)?.let { noteBox ->
+            if (!view.isBoxSecretPresent(noteBox)) {
+                return NotesAPIErrors.ownerPropositionError
+            }
 
-    private fun deleteNote(view: SidechainNodeView, request: DeleteNoteRequest): ApiResponse = view.getNoteBox(request.id)?.let { noteBox ->
-        if (!view.isBoxSecretPresent(noteBox)) {
-            return NotesAPIErrors.ownerPropositionError
+            val boxes = getTransactionFundingBoxes(view, request.fee)
+
+            val signedTransaction =
+                view.createSignedTransaction(boxes.fundingInputs + (noteBox as Box<Proposition>)) { proofs ->
+                    NoteDeletedTransaction(
+                        (boxes.fundingInputs.map { it.id() } + noteBox.id()).toMutableList(),
+                        proofs,
+                        boxes.changeOutput,
+                        request.fee,
+                        NoteDeletedTransaction.currentVersion.toByte()
+                    )
+                }
+            return DeleteNoteResponse(ByteUtils.toHexString(sidechainTransactionsCompanion.toBytes(signedTransaction)))
+        } ?: run {
+            return NotesAPIErrors.noteBoxNotFound(request.id)
         }
-
-        val boxes = getTransactionFundingBoxes(view, request.fee)
-
-        val signedTransaction = view.createSignedTransaction(boxes.fundingInputs + (noteBox as Box<Proposition>)) { proofs ->
-            NoteDeletedTransaction(
-                (boxes.fundingInputs.map { it.id() } + noteBox.id()).toMutableList(),
-                proofs,
-                boxes.changeOutput,
-                request.fee,
-                NoteDeletedTransaction.currentVersion.toByte()
-            )
-        }
-        return DeleteNoteResponse(ByteUtils.toHexString(sidechainTransactionsCompanion.toBytes(signedTransaction)))
-    } ?: run {
-        return NotesAPIErrors.noteBoxNotFound(request.id)
-    }
 
     private fun SidechainNodeView.getNoteBox(boxId: String): NoteBox? {
         val noteBoxOption = nodeState.getClosedBox(BytesUtils.fromHexString(boxId))
@@ -116,5 +132,6 @@ class NotesAPI(private val sidechainTransactionsCompanion: SidechainTransactions
         return noteBoxOption.get() as? NoteBox
     }
 
-    private fun SidechainNodeView.isBoxSecretPresent(box: NoteBox): Boolean = nodeWallet.secretByPublicKey(box.proposition()).isPresent
+    private fun SidechainNodeView.isBoxSecretPresent(box: NoteBox): Boolean =
+        nodeWallet.secretByPublicKey(box.proposition()).isPresent
 }

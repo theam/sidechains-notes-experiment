@@ -23,8 +23,8 @@ class NoteCreatedTransaction(
     changeOutputs: List<ZenBoxData>,
     fee: Long,
     val data: NoteBoxData,
-    val version: Byte): AbstractRegularTransaction(fundingInputsIDs, fundingInputsProofs, changeOutputs, fee) {
-
+    val version: Byte
+) : AbstractRegularTransaction(fundingInputsIDs, fundingInputsProofs, changeOutputs, fee) {
     companion object {
         const val currentVersion = 1
 
@@ -40,7 +40,8 @@ class NoteCreatedTransaction(
         }
     }
 
-    override fun serializer(): ScorexSerializer<BytesSerializable> = NoteCreatedTransactionSerializer() as ScorexSerializer<BytesSerializable>
+    override fun serializer(): ScorexSerializer<BytesSerializable> =
+        NoteCreatedTransactionSerializer() as ScorexSerializer<BytesSerializable>
 
     override fun transactionTypeId(): Byte = NotesAppTransactions.NoteCreated.id
 
@@ -50,7 +51,8 @@ class NoteCreatedTransaction(
 
     override fun customDataMessageToSign(): ByteArray = ByteArray(0)
 
-    override fun getCustomOutputData(): MutableList<BoxData<Proposition, Box<Proposition>>> = mutableListOf(data as BoxData<Proposition, Box<Proposition>>)
+    override fun getCustomOutputData(): MutableList<BoxData<Proposition, Box<Proposition>>> =
+        mutableListOf(data as BoxData<Proposition, Box<Proposition>>)
 
     fun serialize(writer: Writer) {
         inputZenBoxIds.serialize(writer)

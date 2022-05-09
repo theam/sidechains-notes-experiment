@@ -22,7 +22,6 @@ import com.horizen.wallet.ApplicationWallet
 import com.theagilemonkeys.notes.api.NotesAPI
 import com.theagilemonkeys.notes.boxes.NotesAppBoxes
 import com.theagilemonkeys.notes.boxes.serializers.NoteBoxSerializer
-import com.theagilemonkeys.notes.transactions.NoteCreatedTransaction
 import com.theagilemonkeys.notes.transactions.NotesAppTransactions
 import com.theagilemonkeys.notes.transactions.serializers.NoteCreatedTransactionSerializer
 import com.theagilemonkeys.notes.transactions.serializers.NoteDeletedTransactionSerializer
@@ -70,7 +69,6 @@ class NotesAppModule(userSettingsFileName: String?) : AbstractModule() {
         val defaultApplicationWallet: ApplicationWallet = NotesApplicationWallet()
         val defaultApplicationState: ApplicationState = NotesApplicationState()
 
-
         // Define the path to storages:
         val dataDirPath: String = sidechainSettings.scorexSettings().dataDir().absolutePath
         val secretStore = File("$dataDirPath/secret")
@@ -107,7 +105,8 @@ class NotesAppModule(userSettingsFileName: String?) : AbstractModule() {
             .annotatedWith(Names.named("CustomSecretSerializers"))
             .toInstance(customSecretSerializers)
 
-        bind(object : TypeLiteral<HashMap<Byte, TransactionSerializer<BoxTransaction<Proposition, Box<Proposition>>>>>() {})
+        bind(object :
+            TypeLiteral<HashMap<Byte, TransactionSerializer<BoxTransaction<Proposition, Box<Proposition>>>>>() {})
             .annotatedWith(Names.named("CustomTransactionSerializers"))
             .toInstance(customTransactionSerializers)
 

@@ -2,11 +2,10 @@ package com.theagilemonkeys.notes.transactions.serializers
 
 import com.horizen.transaction.TransactionSerializer
 import com.theagilemonkeys.notes.transactions.NoteDeletedTransaction
-import com.theagilemonkeys.notes.transactions.NoteUpdatedTransaction
 import scorex.util.serialization.Reader
 import scorex.util.serialization.Writer
 
-class NoteDeletedTransactionSerializer: TransactionSerializer<NoteDeletedTransaction> {
+class NoteDeletedTransactionSerializer : TransactionSerializer<NoteDeletedTransaction> {
     override fun serialize(transaction: NoteDeletedTransaction, writer: Writer) {
         transaction.serialize(writer)
     }

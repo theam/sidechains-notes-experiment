@@ -18,13 +18,13 @@ import scorex.util.serialization.Reader
 import scorex.util.serialization.Writer
 
 class NoteUpdatedTransaction(
-    fundingInputsIDs: MutableList<ByteArray>,
+    val fundingInputsIDs: MutableList<ByteArray>,
     fundingInputsProofs: List<Signature25519>,
     changeOutputs: List<ZenBoxData>,
     fee: Long,
     val data: NoteBoxData,
-    private val version: Byte): AbstractRegularTransaction(fundingInputsIDs, fundingInputsProofs, changeOutputs, fee) {
-
+    private val version: Byte
+) : AbstractRegularTransaction(fundingInputsIDs, fundingInputsProofs, changeOutputs, fee) {
     companion object {
         const val currentVersion = 1
 
@@ -40,7 +40,8 @@ class NoteUpdatedTransaction(
         }
     }
 
-    override fun serializer(): ScorexSerializer<BytesSerializable> = NoteUpdatedTransactionSerializer() as ScorexSerializer<BytesSerializable>
+    override fun serializer(): ScorexSerializer<BytesSerializable> =
+        NoteUpdatedTransactionSerializer() as ScorexSerializer<BytesSerializable>
 
     override fun transactionTypeId(): Byte = NotesAppTransactions.NoteCreated.id
 
@@ -50,7 +51,8 @@ class NoteUpdatedTransaction(
 
     override fun customDataMessageToSign(): ByteArray = ByteArray(0)
 
-    override fun getCustomOutputData(): MutableList<BoxData<Proposition, Box<Proposition>>> = mutableListOf(data as BoxData<Proposition, Box<Proposition>>)
+    override fun getCustomOutputData(): MutableList<BoxData<Proposition, Box<Proposition>>> =
+        mutableListOf(data as BoxData<Proposition, Box<Proposition>>)
 
     fun serialize(writer: Writer) {
         inputZenBoxIds.serialize(writer)

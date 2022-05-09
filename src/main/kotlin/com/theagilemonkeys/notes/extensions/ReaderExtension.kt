@@ -9,6 +9,5 @@ fun Reader.bytesMutableList(bytesSize: Int): MutableList<ByteArray> {
     for (i in 1..int) {
         list.add(getBytes(bytesSize))
     }
-
     return list
 }

@@ -6,8 +6,6 @@ import com.horizen.box.data.ZenBoxData
 import com.horizen.proof.Signature25519
 import com.horizen.proposition.Proposition
 import com.horizen.transaction.AbstractRegularTransaction
-import com.theagilemonkeys.notes.boxes.data.NoteBoxData
-import com.theagilemonkeys.notes.boxes.data.serializers.NoteBoxDataSerializer
 import com.theagilemonkeys.notes.extensions.bytesMutableList
 import com.theagilemonkeys.notes.extensions.serialize
 import com.theagilemonkeys.notes.transactions.serializers.NoteDeletedTransactionSerializer
@@ -18,12 +16,12 @@ import scorex.util.serialization.Reader
 import scorex.util.serialization.Writer
 
 class NoteDeletedTransaction(
-    fundingInputsIDs: MutableList<ByteArray>,
+    val fundingInputsIDs: MutableList<ByteArray>,
     fundingInputsProofs: List<Signature25519>,
     changeOutputs: List<ZenBoxData>,
     fee: Long,
-    private val version: Byte): AbstractRegularTransaction(fundingInputsIDs, fundingInputsProofs, changeOutputs, fee) {
-
+    private val version: Byte
+) : AbstractRegularTransaction(fundingInputsIDs, fundingInputsProofs, changeOutputs, fee) {
     companion object {
         const val currentVersion = 1
 
@@ -38,7 +36,8 @@ class NoteDeletedTransaction(
         }
     }
 
-    override fun serializer(): ScorexSerializer<BytesSerializable> = NoteDeletedTransactionSerializer() as ScorexSerializer<BytesSerializable>
+    override fun serializer(): ScorexSerializer<BytesSerializable> =
+        NoteDeletedTransactionSerializer() as ScorexSerializer<BytesSerializable>
 
     override fun transactionTypeId(): Byte = NotesAppTransactions.NoteCreated.id
 
