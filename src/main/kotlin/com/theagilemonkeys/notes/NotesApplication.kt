@@ -2,7 +2,7 @@ package com.theagilemonkeys.notes
 
 import com.google.inject.Guice
 import com.horizen.SidechainApp
-import com.theagilemonkeys.notes.core.NotesAppModule
+import com.theagilemonkeys.notes.core.NotesApplicationModule
 import java.io.File
 
 fun main(args: Array<String>) {
@@ -18,7 +18,7 @@ fun main(args: Array<String>) {
 
     // To Initialize the core starting point - SidechainApp, Guice DI is used.
     // Note: it's possible to initialize SidechainApp both using Guice DI or directly by emitting the constructor.
-    val injector = Guice.createInjector(NotesAppModule(settingsFileName))
+    val injector = Guice.createInjector(NotesApplicationModule(settingsFileName))
     val sidechainApp = injector.getInstance(SidechainApp::class.java)
 
     // Start the car registry sidechain node.

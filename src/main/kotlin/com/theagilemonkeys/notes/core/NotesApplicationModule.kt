@@ -29,7 +29,7 @@ import com.theagilemonkeys.notes.transactions.serializers.NoteUpdatedTransaction
 import java.io.File
 import java.util.*
 
-class NotesAppModule(userSettingsFileName: String?) : AbstractModule() {
+class NotesApplicationModule(userSettingsFileName: String?) : AbstractModule() {
     private val settingsReader: SettingsReader
 
     init {
