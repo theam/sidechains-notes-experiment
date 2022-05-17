@@ -1,4 +1,4 @@
-# Ignite notes experiment
+# Horizen Sidechain SDK notes experiment
 
 ![A chain made of paper](./img/header.jpeg "A chain made of paper")
 
